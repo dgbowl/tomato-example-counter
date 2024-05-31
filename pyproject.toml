@@ -23,7 +23,7 @@ classifiers = [
 ]
 requires-python = ">= 3.9"
 dependencies = [
-    "tomato > 0.2",
+    "tomato > 0.2.dev1",
 ]
 
 [project.optional-dependencies]
