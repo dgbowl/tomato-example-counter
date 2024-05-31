@@ -23,7 +23,7 @@ classifiers = [
 ]
 requires-python = ">= 3.9"
 dependencies = [
-    "tomato @ git+https://github.com/dgbowl/tomato.git@driverinterface",
+    "tomato > 0.2",
 ]
 
 [project.optional-dependencies]
