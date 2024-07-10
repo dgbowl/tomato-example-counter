@@ -1,52 +1,53 @@
 import logging
-from tomato.driverinterface_1_0 import ModelInterface
+from tomato.driverinterface_1_0 import DriverInterface, Attr
 from dgbowl_schemas.tomato.payload import Task
+from typing import Any
 
-import time
+from datetime import datetime
 import math
+import time
 import random
 
 logger = logging.getLogger(__name__)
 
 
-class DriverInterface(ModelInterface):
-    class DeviceInterface(ModelInterface.DeviceInterface):
-        def task_runner(self, task, thread):
-            t0 = time.perf_counter()
-            tD = t0
-            started = True
-            self.data = []
-            while getattr(thread, "do_run"):
-                tN = time.perf_counter()
-                if task.technique_name == "count":
-                    val = math.floor(tN - t0)
-                elif task.technique_name == "random":
-                    val = random.uniform(
-                        task.technique_params.get("min", 0),
-                        task.technique_params.get("max", 1),
-                    )
-                self.status = dict(val=val, started=started)
-                if tN - tD > task.sampling_interval:
-                    self.data.append(dict(uts=tN, val=val))
-                    tD += task.sampling_interval
-                if tN - t0 > task.max_duration:
-                    break
-                time.sleep(max(1e-2, task.sampling_interval / 10))
+class DriverInterface(DriverInterface):
+    class DeviceInterface(DriverInterface.DeviceInterface):
+        _max: float
+        _min: float
+        _val: float
 
-    def attrs(self, **kwargs) -> dict:
-        return dict(
-            started=self.Attr(type=bool, rw=True, status=True),
-            val=self.Attr(type=int, status=True),
-        )
+        def do_task(self, task: Task, t0: float, tN: float, **kwargs: dict) -> None:
+            uts = datetime.now().timestamp()
+            if task.technique_name == "count":
+                self._val = math.floor(tN - t0)
+            elif task.technique_name == "random":
+                self._val = random.uniform(self._min, self._max)
+            self.data["uts"].append(uts)
+            self.data["val"].append(self._val)
 
-    def tasks(self, **kwargs) -> dict:
-        return dict(
-            count=dict(),
-            random=dict(
-                min=dict(type=float),
-                max=dict(type=float),
-            ),
-        )
+        def set_attr(self, attr: str, val: Any, **kwargs: dict) -> None:
+            if attr == "max":
+                self._max = val if val is not None else 1.0
+            elif attr == "min":
+                self._min = val if val is not None else 0.0
+
+        def get_attr(self, attr: str, **kwargs: dict) -> Any:
+            if attr == "started":
+                return self.running
+            elif hasattr(self, f"_{attr}"):
+                return getattr(self, f"_{attr}")
+
+        def attrs(self, **kwargs: dict) -> dict:
+            return dict(
+                started=Attr(type=bool, status=True),
+                val=Attr(type=int, status=True),
+                max=Attr(type=float, rw=True, status=False),
+                min=Attr(type=float, rw=True, status=False),
+            )
+
+        def tasks(self, **kwargs: dict) -> set:
+            return {"count", "random"}
 
 
 if __name__ == "__main__":
@@ -76,4 +77,5 @@ if __name__ == "__main__":
     for i in range(0, 5):
         time.sleep(1)
         print(f"{interface.dev_get_attr(**kwargs, attr='val')=}")
+        print(f"{interface.devmap[('a', 1)].status()=}")
         print(f"{interface.task_data(**kwargs)=}")
