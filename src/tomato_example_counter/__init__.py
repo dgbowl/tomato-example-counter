@@ -17,10 +17,10 @@ class DriverInterface(ModelInterface):
         _min: float
         _val: float
 
-        def do_task(self, task: Task, t0: float, tN: float, **kwargs: dict) -> None:
+        def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
             uts = datetime.now().timestamp()
             if task.technique_name == "count":
-                self._val = math.floor(tN - t0)
+                self._val = math.floor(t_now - t_start)
             elif task.technique_name == "random":
                 self._val = random.uniform(self._min, self._max)
             self.data["uts"].append(uts)
@@ -33,14 +33,11 @@ class DriverInterface(ModelInterface):
                 self._min = val if val is not None else 0.0
 
         def get_attr(self, attr: str, **kwargs: dict) -> Any:
-            if attr == "started":
-                return self.running
-            elif hasattr(self, f"_{attr}"):
+            if hasattr(self, f"_{attr}"):
                 return getattr(self, f"_{attr}")
 
         def attrs(self, **kwargs: dict) -> dict:
             return dict(
-                started=Attr(type=bool, status=True),
                 val=Attr(type=int, status=True),
                 max=Attr(type=float, rw=True, status=False),
                 min=Attr(type=float, rw=True, status=False),
@@ -57,6 +54,7 @@ if __name__ == "__main__":
     print(f"{interface.dev_register(**kwargs)=}")
     print(f"{interface.devmap=}")
     print(f"{interface.task_status(**kwargs)=}")
+    print(f"{interface.dev_status(**kwargs)=}")
     task = Task(
         component_tag="a1",
         max_duration=5.0,
