@@ -1,5 +1,5 @@
 import logging
-from tomato.driverinterface_1_0 import DriverInterface, Attr
+from tomato.driverinterface_1_0 import ModelInterface, Attr
 from dgbowl_schemas.tomato.payload import Task
 from typing import Any
 
@@ -11,8 +11,8 @@ import random
 logger = logging.getLogger(__name__)
 
 
-class DriverInterface(DriverInterface):
-    class DeviceInterface(DriverInterface.DeviceInterface):
+class DriverInterface(ModelInterface):
+    class DeviceManager(ModelInterface.DeviceManager):
         _max: float
         _min: float
         _val: float
@@ -46,7 +46,7 @@ class DriverInterface(DriverInterface):
                 min=Attr(type=float, rw=True, status=False),
             )
 
-        def tasks(self, **kwargs: dict) -> set:
+        def capabilities(self, **kwargs: dict) -> set:
             return {"count", "random"}
 
 
