@@ -1,6 +1,5 @@
 import logging
-from tomato.driverinterface_1_0 import ModelInterface, Attr
-from dgbowl_schemas.tomato.payload import Task
+from tomato.driverinterface_1_0 import ModelInterface, Attr, Task
 from typing import Any
 
 from datetime import datetime
@@ -16,6 +15,11 @@ class DriverInterface(ModelInterface):
         _min: float
         _val: float
 
+        def __init__(self, driver, key, **kwargs):
+            super().__init__(driver, key, **kwargs)
+            self._min = 0.0
+            self._max = 1.0
+
         def do_task(
             self, task: Task, t_start: float, t_now: float, **kwargs: dict
         ) -> None:
@@ -29,9 +33,9 @@ class DriverInterface(ModelInterface):
 
         def set_attr(self, attr: str, val: Any, **kwargs: dict) -> None:
             if attr == "max":
-                self._max = val if val is not None else 1.0
+                self._max = val
             elif attr == "min":
-                self._min = val if val is not None else 0.0
+                self._min = val
 
         def get_attr(self, attr: str, **kwargs: dict) -> Any:
             if hasattr(self, f"_{attr}"):
