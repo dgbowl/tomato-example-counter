@@ -1,6 +1,5 @@
 import logging
-from tomato.driverinterface_1_0 import ModelInterface, Attr
-from dgbowl_schemas.tomato.payload import Task
+from tomato.driverinterface_1_0 import ModelInterface, Attr, Task
 from typing import Any
 
 from datetime import datetime
