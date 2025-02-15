@@ -7,6 +7,7 @@ from datetime import datetime
 import math
 import random
 import time
+import xarray as xr
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,6 @@ logger = logging.getLogger(__name__)
 class DeviceInterface(ModelDevice):
     _max: float
     _min: float
-    _val: float
 
     def __init__(self, driver, key, **kwargs):
         super().__init__(driver, key, **kwargs)
@@ -23,11 +23,20 @@ class DeviceInterface(ModelDevice):
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
         uts = datetime.now().timestamp()
         if task.technique_name == "count":
-            self._val = math.floor(t_now - t_start)
+            val = math.floor(t_now - t_start)
         elif task.technique_name == "random":
-            self._val = random.uniform(self._min, self._max)
-        self.data["uts"].append(uts)
-        self.data["val"].append(self._val)
+            val = random.uniform(self._min, self._max)
+        self.last_data = xr.DataArray(
+            data=[val],
+            coords={"uts": [uts]},
+        )
+        if self.data is None:
+            self.data = self.last_data
+        else:
+            self.data = xr.concat([self.data, self.last_data], dim="uts")
+        
+    def do_measure(self, **kwargs) -> None:
+        pass
 
     def set_attr(self, attr: str, val: Any, **kwargs: dict) -> None:
         if attr == "max":
@@ -41,7 +50,6 @@ class DeviceInterface(ModelDevice):
 
     def attrs(self, **kwargs: dict) -> dict:
         return dict(
-            val=Attr(type=int, status=True),
             max=Attr(type=float, rw=True, status=False),
             min=Attr(type=float, rw=True, status=False),
         )
