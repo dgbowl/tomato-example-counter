@@ -19,24 +19,41 @@ class DeviceInterface(ModelDevice):
     def __init__(self, driver, key, **kwargs):
         super().__init__(driver, key, **kwargs)
         self.constants["example_meta"] = "example string"
+        self._min = 0
+        self._max = 10
 
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
         uts = datetime.now().timestamp()
         if task.technique_name == "count":
-            val = math.floor(t_now - t_start)
+            data_vars = {
+                "val": (["uts"], [math.floor(t_now - t_start)]),
+            }
         elif task.technique_name == "random":
             val = random.uniform(self._min, self._max)
-        self.last_data = xr.DataArray(
-            data=[val],
-            coords={"uts": [uts]},
+            data_vars = {
+                "val": (["uts"], [random.uniform(self._min, self._max)]),
+                "min": (["uts"], [self._min]),
+                "max": (["uts"], [self._max]),
+            }
+        self.last_data = xr.Dataset(
+            data_vars=data_vars,
+            coords={"uts": (["uts"], [uts])},
         )
         if self.data is None:
             self.data = self.last_data
         else:
             self.data = xr.concat([self.data, self.last_data], dim="uts")
-        
+
     def do_measure(self, **kwargs) -> None:
-        pass
+        data_vars = {
+            "val": (["uts"], [random.uniform(self._min, self._max)]),
+            "min": (["uts"], [self._min]),
+            "max": (["uts"], [self._max]),
+        }
+        self.last_data = xr.Dataset(
+            data_vars=data_vars,
+            coords={"uts": (["uts"], [datetime.now().timestamp()])},
+        )
 
     def set_attr(self, attr: str, val: Any, **kwargs: dict) -> None:
         if attr == "max":
