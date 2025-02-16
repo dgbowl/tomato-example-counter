@@ -12,7 +12,7 @@ import xarray as xr
 logger = logging.getLogger(__name__)
 
 
-class DeviceInterface(ModelDevice):
+class Device(ModelDevice):
     _max: float
     _min: float
 
@@ -29,7 +29,6 @@ class DeviceInterface(ModelDevice):
                 "val": (["uts"], [math.floor(t_now - t_start)]),
             }
         elif task.technique_name == "random":
-            val = random.uniform(self._min, self._max)
             data_vars = {
                 "val": (["uts"], [random.uniform(self._min, self._max)]),
                 "min": (["uts"], [self._min]),
@@ -76,8 +75,8 @@ class DeviceInterface(ModelDevice):
 
 
 class DriverInterface(ModelInterface):
-    def CreateDeviceManager(self, key, **kwargs):
-        return DeviceInterface(self, key, **kwargs)
+    def DeviceFactory(self, key, **kwargs):
+        return Device(self, key, **kwargs)
 
 
 if __name__ == "__main__":
