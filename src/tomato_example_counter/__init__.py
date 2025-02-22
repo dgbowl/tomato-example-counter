@@ -5,7 +5,6 @@ from dgbowl_schemas.tomato.payload import Task
 from datetime import datetime
 import math
 import random
-import time
 import xarray as xr
 import pint
 
@@ -101,4 +100,3 @@ class Device(ModelDevice):
 class DriverInterface(ModelInterface):
     def DeviceFactory(self, key, **kwargs):
         return Device(self, key, **kwargs)
-        

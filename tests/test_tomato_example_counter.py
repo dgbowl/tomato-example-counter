@@ -18,7 +18,7 @@ def test_create_device():
 
 def test_attr_wrong():
     interface = DriverInterface()
-    ret = interface.dev_register(**kwargs)
+    interface.dev_register(**kwargs)
     with pytest.raises(AssertionError, match="attr 'wrong'"):
         interface.dev_get_attr(attr="wrong", **kwargs)
     with pytest.raises(AssertionError, match="attr 'wrong'"):
