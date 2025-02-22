@@ -1,7 +1,6 @@
 import logging
 from tomato.driverinterface_2_0 import ModelInterface, ModelDevice, Attr
 from dgbowl_schemas.tomato.payload import Task
-from typing import Any
 
 from datetime import datetime
 import math
@@ -13,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class Device(ModelDevice):
-    _max: float
-    _min: float
+    max: float
+    min: float
 
     def __init__(self, driver, key, **kwargs):
         super().__init__(driver, key, **kwargs)
         self.constants["example_meta"] = "example string"
-        self._min = 0
-        self._max = 10
+        self.min = 0
+        self.max = 10
 
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
         uts = datetime.now().timestamp()
@@ -30,9 +29,9 @@ class Device(ModelDevice):
             }
         elif task.technique_name == "random":
             data_vars = {
-                "val": (["uts"], [random.uniform(self._min, self._max)]),
-                "min": (["uts"], [self._min]),
-                "max": (["uts"], [self._max]),
+                "val": (["uts"], [random.uniform(self.min, self.max)]),
+                "min": (["uts"], [self.min]),
+                "max": (["uts"], [self.max]),
             }
         self.last_data = xr.Dataset(
             data_vars=data_vars,
@@ -45,24 +44,26 @@ class Device(ModelDevice):
 
     def do_measure(self, **kwargs) -> None:
         data_vars = {
-            "val": (["uts"], [random.uniform(self._min, self._max)]),
-            "min": (["uts"], [self._min]),
-            "max": (["uts"], [self._max]),
+            "val": (["uts"], [random.uniform(self.min, self.max)]),
+            "min": (["uts"], [self.min]),
+            "max": (["uts"], [self.max]),
         }
         self.last_data = xr.Dataset(
             data_vars=data_vars,
             coords={"uts": (["uts"], [datetime.now().timestamp()])},
         )
 
-    def set_attr(self, attr: str, val: Any, **kwargs: dict) -> None:
-        if attr == "max":
-            self._max = val if val is not None else 1.0
-        elif attr == "min":
-            self._min = val if val is not None else 0.0
+    def set_attr(self, attr: str, val: float, **kwargs: dict) -> float:
+        props = self.attrs()[attr]
+        if not isinstance(val, props.type):
+            val = props.type(val)
+        if hasattr(self, attr):
+            setattr(self, attr, val)
+        return val
 
-    def get_attr(self, attr: str, **kwargs: dict) -> Any:
-        if hasattr(self, f"_{attr}"):
-            return getattr(self, f"_{attr}")
+    def get_attr(self, attr: str, **kwargs: dict) -> float:
+        if hasattr(self, attr):
+            return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
         return dict(
