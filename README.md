@@ -7,12 +7,12 @@ This driver is developed by the [ConCat lab at TU Berlin](https://tu.berlin/en/c
 
 ### Capabilities
 - `count`: for counting up every second
-- `random`: for returning a random number every query
+- `random`: for returning a random number between `min` and `max` every query
 
 ### Attributes
-- `val`: the returned value, `RO`, `float`
-- `max`: the upper limit to `random`, `RW`, `float`
-- `min`: the lower limit to `random`, `RW`, `float`
+- `max`: the upper limit to `random`, `float`
+- `min`: the lower limit to `random`, `float`
+- `param`: test attribute for validation, `param > pint.Quantity("0.1 seconds")`
 
 ## Contributors
 - Peter Kraus
