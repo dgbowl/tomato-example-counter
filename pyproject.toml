@@ -37,7 +37,7 @@ Repository = "https://github.com/dgbowl/tomato-example-counter/"
 
 [tool.setuptools-git-versioning]
 enabled = true
-dev_template = "{tag}.dev{ccount}"
-dirty_template = "{tag}.dev{ccount}"
+dev_template = "{tag}.post{ccount}"
+dirty_template = "{tag}.post{ccount}"
 
 [tool.ruff]
