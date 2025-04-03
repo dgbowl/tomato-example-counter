@@ -36,7 +36,7 @@ class Device(ModelDevice):
         for key in self.attrs(**kwargs):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
-                data_vars[key] = (["uts"], [val.m], {"units": val.u})
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
             else:
                 data_vars[key] = (["uts"], [val])
         self.last_data = xr.Dataset(
@@ -55,7 +55,7 @@ class Device(ModelDevice):
         for key in self.attrs(**kwargs):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
-                data_vars[key] = (["uts"], [val.m], {"units": val.u})
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
             else:
                 data_vars[key] = (["uts"], [val])
 
