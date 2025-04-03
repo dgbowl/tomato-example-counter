@@ -72,15 +72,15 @@ class Device(ModelDevice):
         if isinstance(val, pint.Quantity):
             if val.dimensionless and props.units is not None:
                 val = pint.Quantity(val.m, props.units)
-            assert (
-                val.dimensionality == getattr(self, attr).dimensionality
-            ), f"attr {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
-        assert (
-            props.minimum is None or val > props.minimum
-        ), f"attr {attr!r} is smaller than {props.minimum}"
-        assert (
-            props.maximum is None or val < props.maximum
-        ), f"attr {attr!r} is greater than {props.maximum}"
+            assert val.dimensionality == getattr(self, attr).dimensionality, (
+                f"attr {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
+            )
+        assert props.minimum is None or val > props.minimum, (
+            f"attr {attr!r} is smaller than {props.minimum}"
+        )
+        assert props.maximum is None or val < props.maximum, (
+            f"attr {attr!r} is greater than {props.maximum}"
+        )
 
         setattr(self, attr, val)
         return val
