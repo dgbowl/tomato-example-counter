@@ -32,9 +32,13 @@ class Device(ModelDevice):
         elif task.technique_name == "random":
             data_vars = {
                 "val": (["uts"], [random.uniform(self.min, self.max)]),
-                "min": [self.min],
-                "max": [self.max],
             }
+        for key in self.attrs(**kwargs):
+            val = self.get_attr(attr=key)
+            if isinstance(val, pint.Quantity):
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
+            else:
+                data_vars[key] = (["uts"], [val])
         self.last_data = xr.Dataset(
             data_vars=data_vars,
             coords={"uts": (["uts"], [uts])},
@@ -47,9 +51,14 @@ class Device(ModelDevice):
     def do_measure(self, **kwargs) -> None:
         data_vars = {
             "val": (["uts"], [random.uniform(self.min, self.max)]),
-            "min": [self.min],
-            "max": [self.max],
         }
+        for key in self.attrs(**kwargs):
+            val = self.get_attr(attr=key)
+            if isinstance(val, pint.Quantity):
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
+            else:
+                data_vars[key] = (["uts"], [val])
+
         self.last_data = xr.Dataset(
             data_vars=data_vars,
             coords={"uts": (["uts"], [datetime.now().timestamp()])},

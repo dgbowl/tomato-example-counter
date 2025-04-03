@@ -88,6 +88,7 @@ def test_task_random():
     assert ret.success
     print(f"{ret.data=}")
     assert ret.data.uts.shape == (10,)
+    assert ret.data["min"].shape == (10,)
 
 
 def test_task_count():
@@ -113,3 +114,4 @@ def test_task_count():
     assert ret.success
     print(f"{ret.data=}")
     assert ret.data.uts.shape == (20,)
+    assert ret.data["min"].shape == (20,)
