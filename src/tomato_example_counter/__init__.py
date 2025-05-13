@@ -12,11 +12,14 @@ import pint
 
 logger = logging.getLogger(__name__)
 
+CHOICES = {"red", "blue", "green"}
+
 
 class Device(ModelDevice):
     max: float
     min: float
     param: pint.Quantity
+    choice: str
 
     def __init__(self, driver, key, **kwargs):
         super().__init__(driver, key, **kwargs)
@@ -24,6 +27,7 @@ class Device(ModelDevice):
         self.min = 0
         self.max = 10
         self.param = pint.Quantity("1.0 s")
+        self.choice = "green"
 
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
         uts = datetime.now().timestamp()
@@ -72,7 +76,7 @@ class Device(ModelDevice):
         return val
 
     def get_attr(self, attr: str, **kwargs: dict) -> Val:
-        assert hasattr(self, attr), f"attr {attr!r} not present on component"
+        assert hasattr(self, attr), f"unknown attr: {attr!r}"
         return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
@@ -85,6 +89,12 @@ class Device(ModelDevice):
                 status=False,
                 units="seconds",
                 minimum=pint.Quantity("0.1 s"),
+            ),
+            choice=Attr(
+                type=str,
+                rw=True,
+                status=False,
+                options=CHOICES,
             ),
         )
 
