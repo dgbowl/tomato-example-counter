@@ -1,5 +1,7 @@
 import logging
-from tomato.driverinterface_2_0 import ModelInterface, ModelDevice, Attr
+from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr
+from tomato.driverinterface_2_1.types import Val
+from tomato.driverinterface_2_1.decorators import coerce_val
 from dgbowl_schemas.tomato.payload import Task
 
 from datetime import datetime
@@ -64,28 +66,12 @@ class Device(ModelDevice):
             coords={"uts": (["uts"], [datetime.now().timestamp()])},
         )
 
-    def set_attr(self, attr: str, val: float, **kwargs: dict) -> float:
-        assert hasattr(self, attr), f"attr {attr!r} not present on component"
-        props = self.attrs()[attr]
-        if not isinstance(val, props.type):
-            val = props.type(val)
-        if isinstance(val, pint.Quantity):
-            if val.dimensionless and props.units is not None:
-                val = pint.Quantity(val.m, props.units)
-            assert val.dimensionality == getattr(self, attr).dimensionality, (
-                f"attr {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
-            )
-        assert props.minimum is None or val > props.minimum, (
-            f"attr {attr!r} is smaller than {props.minimum}"
-        )
-        assert props.maximum is None or val < props.maximum, (
-            f"attr {attr!r} is greater than {props.maximum}"
-        )
-
+    @coerce_val
+    def set_attr(self, attr: str, val: float, **kwargs: dict) -> Val:
         setattr(self, attr, val)
         return val
 
-    def get_attr(self, attr: str, **kwargs: dict) -> float:
+    def get_attr(self, attr: str, **kwargs: dict) -> Val:
         assert hasattr(self, attr), f"attr {attr!r} not present on component"
         return getattr(self, attr)
 
