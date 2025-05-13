@@ -1,5 +1,7 @@
 import logging
-from tomato.driverinterface_2_0 import ModelInterface, ModelDevice, Attr
+from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr
+from tomato.driverinterface_2_1.types import Val
+from tomato.driverinterface_2_1.decorators import coerce_val
 from dgbowl_schemas.tomato.payload import Task
 
 from datetime import datetime
@@ -10,11 +12,14 @@ import pint
 
 logger = logging.getLogger(__name__)
 
+CHOICES = {"red", "blue", "green"}
+
 
 class Device(ModelDevice):
     max: float
     min: float
     param: pint.Quantity
+    choice: str
 
     def __init__(self, driver, key, **kwargs):
         super().__init__(driver, key, **kwargs)
@@ -22,6 +27,7 @@ class Device(ModelDevice):
         self.min = 0
         self.max = 10
         self.param = pint.Quantity("1.0 s")
+        self.choice = "green"
 
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
         uts = datetime.now().timestamp()
@@ -64,29 +70,13 @@ class Device(ModelDevice):
             coords={"uts": (["uts"], [datetime.now().timestamp()])},
         )
 
-    def set_attr(self, attr: str, val: float, **kwargs: dict) -> float:
-        assert hasattr(self, attr), f"attr {attr!r} not present on component"
-        props = self.attrs()[attr]
-        if not isinstance(val, props.type):
-            val = props.type(val)
-        if isinstance(val, pint.Quantity):
-            if val.dimensionless and props.units is not None:
-                val = pint.Quantity(val.m, props.units)
-            assert val.dimensionality == getattr(self, attr).dimensionality, (
-                f"attr {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
-            )
-        assert props.minimum is None or val > props.minimum, (
-            f"attr {attr!r} is smaller than {props.minimum}"
-        )
-        assert props.maximum is None or val < props.maximum, (
-            f"attr {attr!r} is greater than {props.maximum}"
-        )
-
+    @coerce_val
+    def set_attr(self, attr: str, val: float, **kwargs: dict) -> Val:
         setattr(self, attr, val)
         return val
 
-    def get_attr(self, attr: str, **kwargs: dict) -> float:
-        assert hasattr(self, attr), f"attr {attr!r} not present on component"
+    def get_attr(self, attr: str, **kwargs: dict) -> Val:
+        assert hasattr(self, attr), f"unknown attr: {attr!r}"
         return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
@@ -99,6 +89,12 @@ class Device(ModelDevice):
                 status=False,
                 units="seconds",
                 minimum=pint.Quantity("0.1 s"),
+            ),
+            choice=Attr(
+                type=str,
+                rw=True,
+                status=False,
+                options=CHOICES,
             ),
         )
 

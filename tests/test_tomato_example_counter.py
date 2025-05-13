@@ -19,14 +19,20 @@ def test_create_device():
 def test_attr_wrong():
     interface = DriverInterface()
     interface.cmp_register(**kwargs)
-    with pytest.raises(AssertionError, match="attr 'wrong'"):
+    with pytest.raises(AssertionError, match="'min' cannot be None"):
+        interface.cmp_set_attr(attr="min", val=None, **kwargs)
+    with pytest.raises(ValueError, match="could not convert"):
+        interface.cmp_set_attr(attr="min", val="wrong", **kwargs)
+    with pytest.raises(AssertionError, match="unknown attr: 'wrong'"):
         interface.cmp_get_attr(attr="wrong", **kwargs)
-    with pytest.raises(AssertionError, match="attr 'wrong'"):
+    with pytest.raises(AssertionError, match="unknown attr: 'wrong'"):
         interface.cmp_set_attr(attr="wrong", val="1.0", **kwargs)
     with pytest.raises(AssertionError, match="wrong dimensionality"):
         interface.cmp_set_attr(attr="param", val="1.0 meter", **kwargs)
     with pytest.raises(AssertionError, match="smaller than"):
         interface.cmp_set_attr(attr="param", val="0.05 s", **kwargs)
+    with pytest.raises(AssertionError, match="'orange' is not in allowed options"):
+        interface.cmp_set_attr(attr="choice", val="orange", **kwargs)
 
 
 def test_get_attr():
@@ -63,6 +69,10 @@ def test_set_attr():
     ret = interface.cmp_set_attr(attr="param", val="1.0 minute", **kwargs)
     assert ret.success
     assert ret.data == pint.Quantity("1.0 minute")
+
+    ret = interface.cmp_set_attr(attr="choice", val="blue", **kwargs)
+    assert ret.success
+    assert ret.data == "blue"
 
 
 def test_task_random():
