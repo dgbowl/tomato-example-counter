@@ -1,8 +1,7 @@
 import logging
-from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr
+from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr, Task
 from tomato.driverinterface_2_1.types import Val
 from tomato.driverinterface_2_1.decorators import coerce_val
-from dgbowl_schemas.tomato.payload import Task
 
 from datetime import datetime
 import math
