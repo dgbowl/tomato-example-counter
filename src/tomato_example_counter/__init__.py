@@ -75,7 +75,8 @@ class Device(ModelDevice):
         return val
 
     def get_attr(self, attr: str, **kwargs: dict) -> Val:
-        assert hasattr(self, attr), f"unknown attr: {attr!r}"
+        if not hasattr(self, attr):
+            raise AttributeError(f"unknown attr: {attr!r}")
         return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
