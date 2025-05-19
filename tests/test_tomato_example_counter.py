@@ -19,19 +19,19 @@ def test_create_device():
 def test_attr_wrong():
     interface = DriverInterface()
     interface.cmp_register(**kwargs)
-    with pytest.raises(AssertionError, match="'min' cannot be None"):
+    with pytest.raises(ValueError, match="'min' cannot be None"):
         interface.cmp_set_attr(attr="min", val=None, **kwargs)
     with pytest.raises(ValueError, match="could not convert"):
         interface.cmp_set_attr(attr="min", val="wrong", **kwargs)
-    with pytest.raises(AssertionError, match="unknown attr: 'wrong'"):
+    with pytest.raises(AttributeError, match="unknown attr: 'wrong'"):
         interface.cmp_get_attr(attr="wrong", **kwargs)
-    with pytest.raises(AssertionError, match="unknown attr: 'wrong'"):
+    with pytest.raises(AttributeError, match="unknown attr: 'wrong'"):
         interface.cmp_set_attr(attr="wrong", val="1.0", **kwargs)
-    with pytest.raises(AssertionError, match="wrong dimensionality"):
+    with pytest.raises(ValueError, match="wrong dimensionality"):
         interface.cmp_set_attr(attr="param", val="1.0 meter", **kwargs)
-    with pytest.raises(AssertionError, match="smaller than"):
+    with pytest.raises(ValueError, match="smaller than"):
         interface.cmp_set_attr(attr="param", val="0.05 s", **kwargs)
-    with pytest.raises(AssertionError, match="'orange' is not in allowed options"):
+    with pytest.raises(ValueError, match="'orange' is not in allowed options"):
         interface.cmp_set_attr(attr="choice", val="orange", **kwargs)
 
 
@@ -79,7 +79,7 @@ def test_task_random():
     interface = DriverInterface()
     interface.cmp_register(**kwargs)
     task = Task(
-        component_tag="a1",
+        component_role="a1",
         max_duration=1.0,
         sampling_interval=0.1,
         technique_name="random",
@@ -105,7 +105,7 @@ def test_task_count():
     interface = DriverInterface()
     interface.cmp_register(**kwargs)
     task = Task(
-        component_tag="a1",
+        component_role="a1",
         max_duration=2.0,
         sampling_interval=0.1,
         technique_name="count",
