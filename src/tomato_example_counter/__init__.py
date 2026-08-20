@@ -1,27 +1,28 @@
 import logging
-from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr, Task
-from tomato.driverinterface_2_1.types import Val
-from tomato.driverinterface_2_1.decorators import coerce_val
-
-from datetime import datetime
 import math
 import random
-import xarray as xr
+from datetime import datetime
+from datetime import timezone as tz
+
 import pint
+import xarray as xr
+from tomato.driverinterface_3_0 import Attr, ModelComponent, ModelInterface, Task
+from tomato.driverinterface_3_0.decorators import coerce_val
+from tomato.driverinterface_3_0.types import Val
 
 logger = logging.getLogger(__name__)
 
 CHOICES = {"red", "blue", "green"}
 
 
-class Device(ModelDevice):
+class Component(ModelComponent):
     max: float
     min: float
     param: pint.Quantity
     choice: str
 
-    def __init__(self, driver, key, **kwargs):
-        super().__init__(driver, key, **kwargs)
+    def __init__(self, driver, name, **kwargs):
+        super().__init__(driver, name, **kwargs)
         self.constants["example_meta"] = "example string"
         self.min = 0
         self.max = 10
@@ -29,7 +30,7 @@ class Device(ModelDevice):
         self.choice = "green"
 
     def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
-        uts = datetime.now().timestamp()
+        uts = datetime.now(tz.utc).timestamp()
         if task.technique_name == "count":
             data_vars = {
                 "val": (["uts"], [math.floor(t_now - t_start)]),
@@ -101,7 +102,9 @@ class Device(ModelDevice):
     def capabilities(self, **kwargs: dict) -> set:
         return {"count", "random"}
 
+    def quit(self, **kwargs):
+        pass
+
 
 class DriverInterface(ModelInterface):
-    def DeviceFactory(self, key, **kwargs):
-        return Device(self, key, **kwargs)
+    pass
