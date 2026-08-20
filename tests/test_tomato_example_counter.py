@@ -6,7 +6,7 @@ from dgbowl_schemas.tomato.payload import Task
 
 from tomato_example_counter import DriverInterface
 
-kwargs = dict(address="a", channel="1")
+kwargs = {"address": "a", "channel": "1"}
 NAME = "example_counter:a:1"
 
 
