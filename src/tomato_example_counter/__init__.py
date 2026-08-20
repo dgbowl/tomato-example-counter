@@ -26,10 +26,12 @@ class Component(ModelComponent):
         self.constants["example_meta"] = "example string"
         self.min = 0
         self.max = 10
-        self.param = pint.Quantity("1.0 s")
+        self.param = pint.Quantity("1.0 s")  # ty: ignore[invalid-assignment]
         self.choice = "green"
 
-    def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
+    def do_task(
+        self, task: Task, t_start: float, t_now: float, t_prev: float, **kwargs: dict
+    ) -> None:
         uts = datetime.now(tz.utc).timestamp()
         if task.technique_name == "count":
             data_vars = {
@@ -42,9 +44,9 @@ class Component(ModelComponent):
         for key in self.attrs(**kwargs):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
-                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})  # ty: ignore[invalid-assignment]
             else:
-                data_vars[key] = (["uts"], [val])
+                data_vars[key] = (["uts"], [val])  # ty: ignore[invalid-assignment]
         self.last_data = xr.Dataset(
             data_vars=data_vars,
             coords={"uts": (["uts"], [uts])},
@@ -67,7 +69,7 @@ class Component(ModelComponent):
 
         self.last_data = xr.Dataset(
             data_vars=data_vars,
-            coords={"uts": (["uts"], [datetime.now().timestamp()])},
+            coords={"uts": (["uts"], [datetime.now(tz.utc).timestamp()])},
         )
 
     @coerce_val
@@ -81,23 +83,23 @@ class Component(ModelComponent):
         return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
-        return dict(
-            max=Attr(type=float, rw=True, status=False),
-            min=Attr(type=float, rw=True, status=False),
-            param=Attr(
+        return {
+            "max": Attr(type=float, rw=True, status=False),
+            "min": Attr(type=float, rw=True, status=False),
+            "param": Attr(
                 type=pint.Quantity,
                 rw=True,
                 status=False,
                 units="seconds",
                 minimum=pint.Quantity("0.1 s"),
             ),
-            choice=Attr(
+            "choice": Attr(
                 type=str,
                 rw=True,
                 status=False,
                 options=CHOICES,
             ),
-        )
+        }
 
     def capabilities(self, **kwargs: dict) -> set:
         return {"count", "random"}
