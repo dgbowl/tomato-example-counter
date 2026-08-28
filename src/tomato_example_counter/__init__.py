@@ -6,7 +6,13 @@ from datetime import timezone as tz
 
 import pint
 import xarray as xr
-from tomato.driverinterface_3_0 import Attr, ModelComponent, ModelInterface, Task
+from tomato.driverinterface_3_0 import (
+    Attr,
+    ModelComponent,
+    ModelInterface,
+    Status,
+    Task,
+)
 from tomato.driverinterface_3_0.decorators import coerce_val
 from tomato.driverinterface_3_0.types import Val
 
@@ -106,6 +112,20 @@ class Component(ModelComponent):
 
     def quit(self, **kwargs):
         pass
+
+    def status(self, **kwargs):
+        attrs = {}
+        for attr, props in self.attrs().items():
+            if props.status:
+                attrs[attr] = self.get_attr(attr)
+
+        ret = Status(
+            connected=True,
+            state=self.state,
+            can_submit=not self.task_list.full,
+            attrs=attrs,
+        )
+        return ret
 
 
 class DriverInterface(ModelInterface):
