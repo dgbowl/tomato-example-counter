@@ -121,8 +121,8 @@ class Component(ModelComponent):
 
         ret = Status(
             connected=True,
-            state=self.state,
-            can_submit=not self.task_list.full,
+            state=self.state,  # ty: ignore[invalid-argument-type]
+            can_submit=not self.task_list.full(),
             attrs=attrs,
         )
         return ret
