@@ -1,35 +1,44 @@
 import logging
-from tomato.driverinterface_2_1 import ModelInterface, ModelDevice, Attr, Task
-from tomato.driverinterface_2_1.types import Val
-from tomato.driverinterface_2_1.decorators import coerce_val
-
-from datetime import datetime
 import math
 import random
-import xarray as xr
+from datetime import datetime
+from datetime import timezone as tz
+
 import pint
+import xarray as xr
+from tomato.driverinterface_3_0 import (
+    Attr,
+    ModelComponent,
+    ModelInterface,
+    Status,
+    Task,
+)
+from tomato.driverinterface_3_0.decorators import coerce_val
+from tomato.driverinterface_3_0.types import Val
 
 logger = logging.getLogger(__name__)
 
 CHOICES = {"red", "blue", "green"}
 
 
-class Device(ModelDevice):
+class Component(ModelComponent):
     max: float
     min: float
     param: pint.Quantity
     choice: str
 
-    def __init__(self, driver, key, **kwargs):
-        super().__init__(driver, key, **kwargs)
+    def __init__(self, driver, name, **kwargs):
+        super().__init__(driver, name, **kwargs)
         self.constants["example_meta"] = "example string"
         self.min = 0
         self.max = 10
-        self.param = pint.Quantity("1.0 s")
+        self.param = pint.Quantity("1.0 s")  # ty: ignore[invalid-assignment]
         self.choice = "green"
 
-    def do_task(self, task: Task, t_start: float, t_now: float, **kwargs: dict) -> None:
-        uts = datetime.now().timestamp()
+    def do_task(
+        self, task: Task, t_start: float, t_now: float, t_prev: float, **kwargs: dict
+    ) -> None:
+        uts = datetime.now(tz.utc).timestamp()
         if task.technique_name == "count":
             data_vars = {
                 "val": (["uts"], [math.floor(t_now - t_start)]),
@@ -41,9 +50,9 @@ class Device(ModelDevice):
         for key in self.attrs(**kwargs):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
-                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
+                data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})  # ty: ignore[invalid-assignment]
             else:
-                data_vars[key] = (["uts"], [val])
+                data_vars[key] = (["uts"], [val])  # ty: ignore[invalid-assignment]
         self.last_data = xr.Dataset(
             data_vars=data_vars,
             coords={"uts": (["uts"], [uts])},
@@ -66,7 +75,7 @@ class Device(ModelDevice):
 
         self.last_data = xr.Dataset(
             data_vars=data_vars,
-            coords={"uts": (["uts"], [datetime.now().timestamp()])},
+            coords={"uts": (["uts"], [datetime.now(tz.utc).timestamp()])},
         )
 
     @coerce_val
@@ -80,28 +89,44 @@ class Device(ModelDevice):
         return getattr(self, attr)
 
     def attrs(self, **kwargs: dict) -> dict:
-        return dict(
-            max=Attr(type=float, rw=True, status=False),
-            min=Attr(type=float, rw=True, status=False),
-            param=Attr(
+        return {
+            "max": Attr(type=float, rw=True, status=False),
+            "min": Attr(type=float, rw=True, status=False),
+            "param": Attr(
                 type=pint.Quantity,
                 rw=True,
                 status=False,
                 units="seconds",
                 minimum=pint.Quantity("0.1 s"),
             ),
-            choice=Attr(
+            "choice": Attr(
                 type=str,
                 rw=True,
                 status=False,
                 options=CHOICES,
             ),
-        )
+        }
 
     def capabilities(self, **kwargs: dict) -> set:
         return {"count", "random"}
 
+    def quit(self, **kwargs):
+        pass
+
+    def status(self, **kwargs):
+        attrs = {}
+        for attr, props in self.attrs().items():
+            if props.status:
+                attrs[attr] = self.get_attr(attr)
+
+        ret = Status(
+            connected=True,
+            state=self.state,  # ty: ignore[invalid-argument-type]
+            can_submit=not self.task_list.full(),
+            attrs=attrs,
+        )
+        return ret
+
 
 class DriverInterface(ModelInterface):
-    def DeviceFactory(self, key, **kwargs):
-        return Device(self, key, **kwargs)
+    pass
