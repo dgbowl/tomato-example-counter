@@ -4,10 +4,11 @@ import pint
 import pytest
 from dgbowl_schemas.tomato.payload import Task
 
-from tomato_example_counter import DriverInterface
+from tomato_example_counter import DriverInterface, SubModel
 
 kwargs = {"address": "a", "channel": "1"}
 NAME = "example_counter:a:1"
+MODEL = SubModel(snum=5.0, sstr="t")
 
 
 def test_create_teardown_device():
@@ -80,6 +81,18 @@ def test_set_attr():
     assert ret.success
     assert ret.data == "blue"
 
+    ret = interface.cmp_get_attr(attr="model", name=NAME)
+    assert ret.success
+    assert ret.data is None
+
+    ret = interface.cmp_set_attr(attr="model", val=MODEL, name=NAME)
+    assert ret.success
+    assert ret.data == MODEL
+
+    ret = interface.cmp_get_attr(attr="model", name=NAME)
+    assert ret.success
+    assert ret.data == MODEL
+
 
 def test_task_random():
     interface = DriverInterface()
@@ -118,7 +131,7 @@ def test_task_count():
         max_duration=2.0,
         sampling_interval=0.1,
         technique_name="count",
-        task_params={"param": "3.0 seconds"},
+        task_params={"param": "3.0 seconds", "model": MODEL},
     )
     ret = interface.task_start(task=task, name=NAME)
     print(f"{ret=}")
@@ -137,3 +150,9 @@ def test_task_count():
     print(f"{ret.data=}")
     assert ret.data.uts.shape == (20,)
     assert ret.data["min"].shape == (20,)
+    assert ret.data["model"].values[0] == MODEL.model_dump()
+
+    ret = interface.cmp_last_data(name=NAME)
+    print(f"{ret.data=}")
+    assert ret.success
+    assert ret.data["model"].values[0] == MODEL.model_dump()

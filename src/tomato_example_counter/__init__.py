@@ -6,6 +6,7 @@ from datetime import timezone as tz
 
 import pint
 import xarray as xr
+from pydantic import BaseModel
 from tomato.driverinterface_3_0 import (
     Attr,
     ModelComponent,
@@ -21,11 +22,17 @@ logger = logging.getLogger(__name__)
 CHOICES = {"red", "blue", "green"}
 
 
+class SubModel(BaseModel):
+    snum: float
+    sstr: str
+
+
 class Component(ModelComponent):
     max: float
     min: float
     param: pint.Quantity
     choice: str
+    model: SubModel | None
 
     def __init__(self, driver, name, **kwargs):
         super().__init__(driver, name, **kwargs)
@@ -34,6 +41,7 @@ class Component(ModelComponent):
         self.max = 10
         self.param = pint.Quantity("1.0 s")  # ty: ignore[invalid-assignment]
         self.choice = "green"
+        self.model = None
 
     def do_task(
         self, task: Task, t_start: float, t_now: float, t_prev: float, **kwargs: dict
@@ -51,6 +59,8 @@ class Component(ModelComponent):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
                 data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})  # ty: ignore[invalid-assignment]
+            elif isinstance(val, SubModel):
+                data_vars[key] = (["uts"], [val.model_dump()])
             else:
                 data_vars[key] = (["uts"], [val])  # ty: ignore[invalid-assignment]
         self.last_data = xr.Dataset(
@@ -70,6 +80,8 @@ class Component(ModelComponent):
             val = self.get_attr(attr=key)
             if isinstance(val, pint.Quantity):
                 data_vars[key] = (["uts"], [val.m], {"units": str(val.u)})
+            elif isinstance(val, SubModel):
+                data_vars[key] = (["uts"], [val.model_dump()])
             else:
                 data_vars[key] = (["uts"], [val])
 
@@ -104,6 +116,11 @@ class Component(ModelComponent):
                 rw=True,
                 status=False,
                 options=CHOICES,
+            ),
+            "model": Attr(
+                type=SubModel,
+                rw=True,
+                status=False,
             ),
         }
 
