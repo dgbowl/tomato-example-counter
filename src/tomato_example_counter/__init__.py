@@ -1,8 +1,7 @@
 import logging
 import math
 import random
-from datetime import datetime
-from datetime import timezone as tz
+from datetime import UTC, datetime
 
 import pint
 import xarray as xr
@@ -46,7 +45,7 @@ class Component(ModelComponent):
     def do_task(
         self, task: Task, t_start: float, t_now: float, t_prev: float, **kwargs: dict
     ) -> None:
-        uts = datetime.now(tz.utc).timestamp()
+        uts = datetime.now(UTC).timestamp()
         if task.technique_name == "count":
             data_vars = {
                 "val": (["uts"], [math.floor(t_now - t_start)]),
@@ -87,7 +86,7 @@ class Component(ModelComponent):
 
         self.last_data = xr.Dataset(
             data_vars=data_vars,
-            coords={"uts": (["uts"], [datetime.now(tz.utc).timestamp()])},
+            coords={"uts": (["uts"], [datetime.now(UTC).timestamp()])},
         )
 
     @coerce_val
