@@ -14,6 +14,7 @@ This driver is developed by the [ConCat lab at TU Berlin](https://tu.berlin/en/c
 - `min`: the lower limit to `random`, `float`
 - `param`: test attribute for unit validation, `param > pint.Quantity("0.1 seconds")`
 - `choice`: test attribute for `options` validation, `choice ∈ {"red", "blue", "green"}`
+- `model`: test attribute for pydantic submodel validation, `SubModel`
 
 ## Contributors
 - Peter Kraus
