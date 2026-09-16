@@ -101,8 +101,8 @@ class Component(ModelComponent):
 
     def attrs(self, **kwargs: dict) -> dict:
         return {
-            "max": Attr(type=float, rw=True, status=False),
-            "min": Attr(type=float, rw=True, status=False),
+            "max": Attr(type=float, rw=True, status=True),
+            "min": Attr(type=float, rw=True, status=True),
             "param": Attr(
                 type=pint.Quantity,
                 rw=True,
