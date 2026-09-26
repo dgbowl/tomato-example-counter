@@ -42,6 +42,8 @@ def test_attr_wrong():
         interface.cmp_set_attr(attr="param", val="0.05 s", name=NAME)
     with pytest.raises(ValueError, match="'orange' is not in allowed options"):
         interface.cmp_set_attr(attr="choice", val="orange", name=NAME)
+    with pytest.raises(TypeError, match="'True' is not of type 'bool' or 'int'"):
+        interface.cmp_set_attr(attr="on", val="True", name=NAME)
 
 
 def test_get_attr():
@@ -53,6 +55,12 @@ def test_get_attr():
     ret = interface.cmp_get_attr(attr="min", name=NAME)
     assert ret.success
     assert ret.data == 0
+    ret = interface.cmp_get_attr(attr="seconds", name=NAME)
+    assert ret.success
+    assert isinstance(ret.data, pint.Quantity)
+    ret = interface.cmp_get_attr(attr="on", name=NAME)
+    assert ret.success
+    assert ret.data is False
 
 
 def test_set_attr():
