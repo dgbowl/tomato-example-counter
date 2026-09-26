@@ -1,6 +1,7 @@
 import logging
 import math
 import random
+import time
 from datetime import UTC, datetime
 
 import pint
@@ -32,6 +33,12 @@ class Component(ModelComponent):
     param: pint.Quantity
     choice: str
     model: SubModel | None
+    on: bool
+
+    @property
+    def seconds(self) -> pint.Quantity:
+        q = pint.Quantity(time.perf_counter(), "s")
+        return q  # ty: ignore[invalid-return-type]
 
     def __init__(self, driver, name, **kwargs):
         super().__init__(driver, name, **kwargs)
@@ -41,6 +48,7 @@ class Component(ModelComponent):
         self.param = pint.Quantity("1.0 s")  # ty: ignore[invalid-assignment]
         self.choice = "green"
         self.model = None
+        self.on = False
 
     def do_task(
         self, task: Task, t_start: float, t_now: float, t_prev: float, **kwargs: dict
@@ -106,7 +114,7 @@ class Component(ModelComponent):
             "param": Attr(
                 type=pint.Quantity,
                 rw=True,
-                status=False,
+                status=True,
                 units="seconds",
                 minimum=pint.Quantity("0.1 s"),
             ),
@@ -120,6 +128,17 @@ class Component(ModelComponent):
                 type=SubModel,
                 rw=True,
                 status=False,
+            ),
+            "on": Attr(
+                type=bool,
+                rw=True,
+                status=False,
+            ),
+            "seconds": Attr(
+                type=pint.Quantity,
+                rw=False,
+                status=False,
+                units="seconds",
             ),
         }
 
@@ -140,6 +159,7 @@ class Component(ModelComponent):
             state=self.state,  # ty: ignore[invalid-argument-type]
             can_submit=not self.task_list.full(),
             attrs=attrs,
+            task=self.running_task,
         )
         return ret
 

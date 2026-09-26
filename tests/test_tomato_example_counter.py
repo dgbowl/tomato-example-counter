@@ -26,10 +26,12 @@ def test_create_teardown_device():
 def test_attr_wrong():
     interface = DriverInterface()
     interface.cmp_register(name=NAME, **kwargs)
-    with pytest.raises(ValueError, match="'min' cannot be None"):
-        interface.cmp_set_attr(attr="min", val=None, name=NAME)
+    with pytest.raises(ValueError, match="'max' cannot be None"):
+        interface.cmp_set_attr(attr="max", val=None, name=NAME)
     with pytest.raises(ValueError, match="could not convert"):
-        interface.cmp_set_attr(attr="min", val="wrong", name=NAME)
+        interface.cmp_set_attr(attr="max", val="wrong", name=NAME)
+    with pytest.raises(AttributeError, match="is read-only"):
+        interface.cmp_set_attr(attr="seconds", val=1.3, name=NAME)
     with pytest.raises(AttributeError, match="unknown attr: 'wrong'"):
         interface.cmp_get_attr(attr="wrong", name=NAME)
     with pytest.raises(AttributeError, match="unknown attr: 'wrong'"):
@@ -102,7 +104,7 @@ def test_task_random():
         max_duration=1.0,
         sampling_interval=0.1,
         technique_name="random",
-        task_params={"min": 0, "max": 10},
+        task_params={"max": 10},
     )
     ret = interface.task_start(task=task, name=NAME)
     print(f"{ret=}")
