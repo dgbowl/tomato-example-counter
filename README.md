@@ -15,6 +15,8 @@ This driver is developed by the [ConCat lab at TU Berlin](https://tu.berlin/en/c
 - `param`: test attribute for unit validation, `param > pint.Quantity("0.1 seconds")`
 - `choice`: test attribute for `options` validation, `choice ∈ {"red", "blue", "green"}`
 - `model`: test attribute for pydantic submodel validation, `SubModel`
+- `on`: test attribute for boolean values, `bool`
+- `seconds`: test attribute for read-only values, `pint.Quantity(..., "seconds")`
 
 ## Contributors
 - Peter Kraus
