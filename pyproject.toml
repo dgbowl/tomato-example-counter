@@ -24,7 +24,7 @@ classifiers = [
 ]
 requires-python = ">= 3.11"
 dependencies = [
-    "tomato > 3.0rc4",
+    "tomato > 3.0rc4.post0",
 ]
 
 [project.optional-dependencies]
