@@ -11,6 +11,7 @@ from tomato.driverinterface_3_0 import (
     Attr,
     ModelComponent,
     ModelInterface,
+    Settings,
     Status,
     Task,
 )
@@ -20,6 +21,10 @@ from tomato.driverinterface_3_0.types import Val
 logger = logging.getLogger(__name__)
 
 CHOICES = {"red", "blue", "green"}
+
+
+class Settings(Settings):
+    idle_measurement_interval: int | None = 1
 
 
 class SubModel(BaseModel):
