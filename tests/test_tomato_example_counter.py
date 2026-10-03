@@ -99,6 +99,18 @@ def test_set_attr():
     assert ret.success
     assert ret.data == MODEL
 
+    mjson = MODEL.model_dump_json()
+    assert isinstance(mjson, str)
+    ret = interface.cmp_set_attr(attr="model", val=mjson, name=NAME)
+    assert ret.success
+    assert ret.data == MODEL
+
+    mdict = MODEL.model_dump()
+    assert isinstance(mdict, dict)
+    ret = interface.cmp_set_attr(attr="model", val=mdict, name=NAME)
+    assert ret.success
+    assert ret.data == MODEL
+
     ret = interface.cmp_get_attr(attr="model", name=NAME)
     assert ret.success
     assert ret.data == MODEL

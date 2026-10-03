@@ -12,7 +12,6 @@ from tomato.driverinterface_3_0 import (
     ModelComponent,
     ModelInterface,
     Settings,
-    Status,
     Task,
 )
 from tomato.driverinterface_3_0.decorators import coerce_val
@@ -43,14 +42,14 @@ class Component(ModelComponent):
     @property
     def seconds(self) -> pint.Quantity:
         q = pint.Quantity(time.perf_counter(), "s")
-        return q  # ty: ignore[invalid-return-type]
+        return q
 
     def __init__(self, driver, name, **kwargs):
         super().__init__(driver, name, **kwargs)
         self.constants["example_meta"] = "example string"
         self.min = 0
         self.max = 10
-        self.param = pint.Quantity("1.0 s")  # ty: ignore[invalid-assignment]
+        self.param = pint.Quantity("1.0 s")
         self.choice = "green"
         self.model = None
         self.on = False
@@ -152,21 +151,6 @@ class Component(ModelComponent):
 
     def quit(self, **kwargs):
         pass
-
-    def status(self, **kwargs):
-        attrs = {}
-        for attr, props in self.attrs().items():
-            if props.status:
-                attrs[attr] = self.get_attr(attr)
-
-        ret = Status(
-            connected=True,
-            state=self.state,  # ty: ignore[invalid-argument-type]
-            can_submit=not self.task_list.full(),
-            attrs=attrs,
-            task=self.running_task,
-        )
-        return ret
 
 
 class DriverInterface(ModelInterface):
