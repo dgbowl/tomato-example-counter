@@ -33,7 +33,7 @@ jobs:
             run: |
                 sphinx-apidoc -o docs/source/apidoc src/tomato -T -M -E -f --templatedir=docs/apidoc_t
                 sphinx-build -W -b html docs/source public/main
-          - uses: actions/upload-artifact@v4
+          - uses: actions/upload-artifact@v7
             with:
               name: public-${{ inputs.os }}-${{ inputs.pyver }}
               path: public/main
