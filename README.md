@@ -3,6 +3,10 @@ An example driver for `tomato`, used for testing purposes.
 
 This driver is developed by the [ConCat lab at TU Berlin](https://tu.berlin/en/concat).
 
+## Configuration
+- `address`: *Optional*.
+- `channel`: *Optional*.
+
 ## Supported functions
 
 ### Capabilities

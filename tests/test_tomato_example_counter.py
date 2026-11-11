@@ -6,26 +6,35 @@ from dgbowl_schemas.tomato.payload import Task
 
 from tomato_example_counter import DriverInterface, SubModel
 
-kwargs = {"address": "a", "channel": "1"}
+KWARGS = {"address": "a", "channel": "1"}
 NAME = "example_counter:a:1"
 MODEL = SubModel(snum=5.0, sstr="t")
 
 
-def test_create_teardown_device():
+@pytest.mark.parametrize(
+    "kwargs, name",
+    [
+        ({"address": None, "channel": None}, "example_counter"),
+        ({"address": None, "channel": "1"}, "example_counter::1"),
+        ({"address": "a", "channel": None}, "example_counter:a"),
+        ({"address": "a", "channel": "1"}, "example_counter:a:1"),
+    ],
+)
+def test_create_teardown_device(kwargs, name):
     interface = DriverInterface()
     print(f"{interface=}")
-    ret = interface.cmp_register(name=NAME, **kwargs)
+    ret = interface.cmp_register(name=name, **kwargs)
     assert ret.success
     print(f"{interface.devmap=}")
-    assert NAME in interface.devmap
-    ret = interface.cmp_quit(name=NAME)
+    assert name in interface.devmap
+    ret = interface.cmp_quit(name=name)
     assert ret.success
-    assert NAME not in interface.devmap
+    assert name not in interface.devmap
 
 
 def test_attr_wrong():
     interface = DriverInterface()
-    interface.cmp_register(name=NAME, **kwargs)
+    interface.cmp_register(name=NAME, **KWARGS)
     with pytest.raises(ValueError, match="'max' cannot be None"):
         interface.cmp_set_attr(attr="max", val=None, name=NAME)
     with pytest.raises(ValueError, match="could not convert"):
@@ -48,7 +57,7 @@ def test_attr_wrong():
 
 def test_get_attr():
     interface = DriverInterface()
-    ret = interface.cmp_register(name=NAME, **kwargs)
+    ret = interface.cmp_register(name=NAME, **KWARGS)
     ret = interface.cmp_attrs(name=NAME)
     assert ret.success
     assert "min" in ret.data
@@ -65,7 +74,7 @@ def test_get_attr():
 
 def test_set_attr():
     interface = DriverInterface()
-    interface.cmp_register(name=NAME, **kwargs)
+    interface.cmp_register(name=NAME, **KWARGS)
 
     ret = interface.cmp_set_attr(attr="min", val=1.0, name=NAME)
     assert ret.success
@@ -118,7 +127,7 @@ def test_set_attr():
 
 def test_task_random():
     interface = DriverInterface()
-    interface.cmp_register(name=NAME, **kwargs)
+    interface.cmp_register(name=NAME, **KWARGS)
     task = Task(
         component_role="a1",
         max_duration=1.0,
@@ -147,7 +156,7 @@ def test_task_random():
 
 def test_task_count():
     interface = DriverInterface()
-    interface.cmp_register(name=NAME, **kwargs)
+    interface.cmp_register(name=NAME, **KWARGS)
     task = Task(
         component_role="a1",
         max_duration=2.0,
