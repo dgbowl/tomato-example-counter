@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 CHOICES = {"red", "blue", "green"}
 
 
-class Settings(Settings):
+class Settings(Settings, extra="allow"):
     idle_measurement_interval: int | None = 1
 
 
