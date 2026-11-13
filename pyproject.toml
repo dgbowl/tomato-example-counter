@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "tomato-example-counter"
 authors = [
-    {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
+    {name = "Peter Kraus"},
 ]
 maintainers = [
     {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
@@ -24,7 +24,7 @@ classifiers = [
 ]
 requires-python = ">= 3.11"
 dependencies = [
-    "tomato >= 3.0rc5.post1",
+    "tomato >= 3.0rc7",
 ]
 
 [project.optional-dependencies]
